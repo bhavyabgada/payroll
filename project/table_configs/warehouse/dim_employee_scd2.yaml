@@ -1,0 +1,55 @@
+# SCD2 Configuration for Employee Dimension
+
+dimension_name: dim_employee
+source_table: ${ref('stg_employees')}
+
+# Business keys (unique identifiers)
+business_keys:
+  - employee_id
+
+# Columns to track for changes (SCD2)
+tracked_columns:
+  - first_name
+  - last_name
+  - email
+  - phone
+  - job_id
+  - department
+  - status
+
+# Metadata columns (not tracked for changes)
+meta_columns:
+  - hire_date
+  - termination_date
+  - created_at
+  - updated_at
+
+# SCD2 configuration
+hash_algorithm: md5
+surrogate_key_name: employee_key
+effective_from_col: effective_from
+effective_to_col: effective_to
+is_current_col: is_current
+hash_col: row_hash
+
+# Advanced features
+handle_late_arrivals: true
+soft_delete: true
+
+# BigQuery optimization
+partition_by: effective_from
+cluster_by:
+  - employee_id
+  - is_current
+  - department
+
+# Project configuration
+project_id: payroll-analytics-dev
+dataset_id: payroll_warehouse
+
+# Description and tags
+description: "Employee dimension with SCD Type 2 history tracking"
+tags:
+  - dimension
+  - scd2
+  - hr

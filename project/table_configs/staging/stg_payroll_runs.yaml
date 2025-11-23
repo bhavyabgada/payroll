@@ -1,0 +1,31 @@
+table_name: stg_payroll_runs
+layer: staging
+table_type: source
+source_table: ${ref('raw_payroll_runs')}
+columns:
+  - payroll_id
+  - employee_id
+  - pay_period_id
+  - pay_date
+  - gross_pay
+  - net_pay
+  - tax_withheld
+  - deductions
+  - reimbursements
+  - hours_worked
+  - overtime_hours
+  - status
+  - created_at
+  - updated_at
+partition_by: pay_date
+cluster_by:
+  - employee_id
+  - pay_date
+description: "Staging table for payroll runs - transactional payroll data"
+tags:
+  - staging
+  - payroll
+  - finance
+incremental: true
+dataset_id: payroll_staging
+

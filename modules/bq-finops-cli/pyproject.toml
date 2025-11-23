@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bq-finops-cli"
+version = "0.1.0"
+description = "BigQuery cost monitoring and optimization toolkit"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Bhavya Gada", email = "bhavya@dataeng.io"}
+]
+keywords = ["bigquery", "gcp", "finops", "cost-optimization", "monitoring"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+]
+
+dependencies = [
+    "google-cloud-bigquery>=3.0.0",
+    "google-cloud-logging>=3.0.0",
+    "click>=8.0.0",
+    "pydantic>=2.0.0",
+    "tabulate>=0.9.0",
+    "python-dateutil>=2.8.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.10.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+]
+
+[project.scripts]
+bq-finops = "bq_finops.cli:cli"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "--cov=bq_finops --cov-report=term-missing"
+
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311']
+

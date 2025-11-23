@@ -1,0 +1,209 @@
+# Airflow Webserver and Scheduler Deployments
+
+---
+# Airflow Webserver Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: airflow-webserver
+  namespace: payroll-analytics
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: web
+  selector:
+    app: airflow
+    component: webserver
+
+---
+# Airflow Webserver Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-webserver
+  namespace: payroll-analytics
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: airflow
+      component: webserver
+  template:
+    metadata:
+      labels:
+        app: airflow
+        component: webserver
+    spec:
+      initContainers:
+      - name: wait-for-postgres
+        image: postgres:13
+        command:
+        - sh
+        - -c
+        - |
+          until pg_isready -h postgres -U airflow; do
+            echo "Waiting for postgres..."
+            sleep 2
+          done
+      containers:
+      - name: webserver
+        image: gcr.io/payroll-analytics-prod/airflow:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: web
+        envFrom:
+        - configMapRef:
+            name: payroll-config
+        env:
+        - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+          value: "postgresql+psycopg2://airflow:airflow@postgres:5432/airflow"
+        - name: AIRFLOW__CORE__FERNET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: payroll-secrets
+              key: airflow-fernet-key
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /var/secrets/google/service-account-key.json
+        volumeMounts:
+        - name: gcp-credentials
+          mountPath: /var/secrets/google
+          readOnly: true
+        - name: airflow-logs
+          mountPath: /opt/airflow/logs
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        command:
+        - bash
+        - -c
+        - |
+          airflow db init
+          airflow users create \
+            --username admin \
+            --password admin \
+            --firstname Admin \
+            --lastname User \
+            --role Admin \
+            --email admin@example.com || true
+          airflow webserver
+      volumes:
+      - name: gcp-credentials
+        secret:
+          secretName: gcp-credentials
+      - name: airflow-logs
+        persistentVolumeClaim:
+          claimName: airflow-logs-pvc
+
+---
+# Airflow Scheduler Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-scheduler
+  namespace: payroll-analytics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airflow
+      component: scheduler
+  template:
+    metadata:
+      labels:
+        app: airflow
+        component: scheduler
+    spec:
+      initContainers:
+      - name: wait-for-postgres
+        image: postgres:13
+        command:
+        - sh
+        - -c
+        - |
+          until pg_isready -h postgres -U airflow; do
+            echo "Waiting for postgres..."
+            sleep 2
+          done
+      containers:
+      - name: scheduler
+        image: gcr.io/payroll-analytics-prod/airflow:latest
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: payroll-config
+        env:
+        - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+          value: "postgresql+psycopg2://airflow:airflow@postgres:5432/airflow"
+        - name: AIRFLOW__CORE__FERNET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: payroll-secrets
+              key: airflow-fernet-key
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /var/secrets/google/service-account-key.json
+        volumeMounts:
+        - name: gcp-credentials
+          mountPath: /var/secrets/google
+          readOnly: true
+        - name: airflow-logs
+          mountPath: /opt/airflow/logs
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - 'airflow jobs check --job-type SchedulerJob --hostname "$HOSTNAME"'
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        command:
+        - bash
+        - -c
+        - airflow scheduler
+      volumes:
+      - name: gcp-credentials
+        secret:
+          secretName: gcp-credentials
+      - name: airflow-logs
+        persistentVolumeClaim:
+          claimName: airflow-logs-pvc
+
+---
+# PersistentVolumeClaim for Airflow logs
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: airflow-logs-pvc
+  namespace: payroll-analytics
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi
+

@@ -1,0 +1,35 @@
+# Main Project Requirements
+# Payroll & Workforce Analytics Modernization Platform
+
+# Our Published Modules
+synthetic-payroll-lab==0.1.0
+scd2-bq-engine==0.1.0
+dataform-warehouse-blueprints==0.1.0
+bq-finops-cli==0.1.0
+
+# GCP / BigQuery
+google-cloud-bigquery>=3.0.0
+google-cloud-storage>=2.0.0
+google-cloud-logging>=3.0.0
+google-cloud-monitoring>=2.0.0
+
+# Airflow (local development)
+apache-airflow>=2.7.0
+apache-airflow-providers-google>=10.0.0
+
+# Data Quality
+great-expectations>=0.18.0
+pandas>=2.0.0
+
+# Configuration & Utilities
+pyyaml>=6.0
+python-dotenv>=1.0.0
+click>=8.0.0
+pydantic>=2.0.0
+
+# Development
+pytest>=7.0.0
+pytest-cov>=4.0.0
+black>=23.0.0
+flake8>=6.0.0
+

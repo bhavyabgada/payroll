@@ -1,0 +1,16 @@
+{
+  "warehouse": "bigquery",
+  "defaultProject": "payroll-analytics-dev",
+  "defaultLocation": "US",
+  "defaultDatabase": "payroll_raw",
+  "assertionSchema": "payroll_assertions",
+  "vars": {
+    "environment": "dev",
+    "raw_dataset": "payroll_raw",
+    "staging_dataset": "payroll_staging",
+    "warehouse_dataset": "payroll_warehouse",
+    "marts_dataset": "payroll_marts",
+    "incremental_date": "${INCREMENTAL_DATE || '1970-01-01'}"
+  }
+}
+

@@ -1,0 +1,204 @@
+# Payroll Analytics Platform Configuration
+
+project:
+  name: "Payroll & Workforce Analytics Modernization Platform"
+  version: "1.0.0"
+  environment: "dev"
+
+# GCP Configuration
+gcp:
+  project_id: "payroll-analytics-dev"
+  region: "us-central1"
+  location: "US"
+  
+  # BigQuery Datasets
+  datasets:
+    raw: "payroll_raw"
+    staging: "payroll_staging"
+    warehouse: "payroll_warehouse"
+    marts: "payroll_marts"
+    assertions: "payroll_assertions"
+  
+  # GCS Buckets
+  buckets:
+    landing: "gs://payroll-landing-dev"
+    archive: "gs://payroll-archive-dev"
+    temp: "gs://payroll-temp-dev"
+
+# Data Sources
+sources:
+  - name: "employees"
+    format: "csv"
+    location: "${GCS_LANDING}/employees/"
+    schema_file: "schemas/employees.json"
+  
+  - name: "jobs"
+    format: "csv"
+    location: "${GCS_LANDING}/jobs/"
+    schema_file: "schemas/jobs.json"
+  
+  - name: "cost_centers"
+    format: "csv"
+    location: "${GCS_LANDING}/cost_centers/"
+    schema_file: "schemas/cost_centers.json"
+  
+  - name: "schedules"
+    format: "csv"
+    location: "${GCS_LANDING}/schedules/"
+    schema_file: "schemas/schedules.json"
+  
+  - name: "timecards"
+    format: "csv"
+    location: "${GCS_LANDING}/timecards/"
+    schema_file: "schemas/timecards.json"
+  
+  - name: "payroll_runs"
+    format: "csv"
+    location: "${GCS_LANDING}/payroll_runs/"
+    schema_file: "schemas/payroll_runs.json"
+
+# DataOps Configuration
+dataops:
+  # Great Expectations
+  great_expectations:
+    enabled: true
+    config_dir: "../great_expectations"
+    checkpoint_on_staging: true
+    checkpoint_on_warehouse: true
+    fail_on_error: true
+  
+  # Data Quality Thresholds
+  quality_thresholds:
+    completeness_min: 0.95
+    uniqueness_min: 0.99
+    timeliness_max_hours: 24
+  
+  # Lineage
+  lineage:
+    enabled: true
+    tool: "dataform"  # Dataform has built-in lineage
+
+# FinOps Configuration
+finops:
+  enabled: true
+  
+  # Cost Controls
+  cost_controls:
+    daily_budget_usd: 50.0
+    alert_threshold_usd: 40.0
+    
+  # Partitioning Strategy
+  partitioning:
+    default_column: "updated_at"
+    default_type: "DAY"
+    
+  # Clustering Strategy
+  clustering:
+    max_columns: 4
+    
+  # Retention Policies (days)
+  retention:
+    raw: 90
+    staging: 60
+    warehouse: 730  # 2 years
+    marts: 365
+  
+  # Monitoring
+  monitoring:
+    tool: "bq-finops-cli"
+    schedule: "0 8 * * *"  # Daily at 8 AM
+
+# Privacy / PII Governance
+privacy:
+  enabled: true
+  
+  # PII Classification
+  pii_fields:
+    - table: "employees"
+      fields: ["email", "phone", "ssn", "address"]
+      classification: "high"
+    
+    - table: "payroll_runs"
+      fields: ["bank_account", "routing_number"]
+      classification: "high"
+  
+  # Tiered Datasets
+  tiers:
+    - name: "restricted"
+      dataset: "payroll_warehouse_restricted"
+      access_group: "payroll-admin@company.com"
+      
+    - name: "masked"
+      dataset: "payroll_warehouse_masked"
+      access_group: "payroll-analysts@company.com"
+      masking_rules:
+        - field: "email"
+          method: "hash"
+        - field: "ssn"
+          method: "redact"
+    
+    - name: "aggregated"
+      dataset: "payroll_marts"
+      access_group: "all-employees@company.com"
+      description: "Only aggregated data, no PII"
+  
+  # Audit Logging
+  audit:
+    enabled: true
+    retention_days: 2555  # 7 years for compliance
+
+# Airflow Configuration
+airflow:
+  enabled: true
+  
+  # DAG Default Args
+  dag_defaults:
+    owner: "data-engineering"
+    depends_on_past: false
+    email_on_failure: true
+    email_on_retry: false
+    retries: 2
+    retry_delay_minutes: 5
+  
+  # Schedule
+  schedules:
+    main_pipeline: "0 2 * * *"  # Daily at 2 AM
+    quality_checks: "0 3 * * *"  # Daily at 3 AM
+    cost_analysis: "0 8 * * MON"  # Weekly on Monday at 8 AM
+
+# Module Integration
+modules:
+  synthetic_payroll_lab:
+    enabled: true
+    version: "0.1.0"
+    use_for: "testing"
+  
+  scd2_bq_engine:
+    enabled: true
+    version: "0.1.0"
+    use_for: "dim_employee"
+  
+  dataform_warehouse_blueprints:
+    enabled: true
+    version: "0.1.0"
+    use_for: "all_tables"
+  
+  bq_finops_cli:
+    enabled: true
+    version: "0.1.0"
+    use_for: "cost_monitoring"
+
+# Notifications
+notifications:
+  slack:
+    enabled: false
+    webhook_url: "${SLACK_WEBHOOK_URL}"
+    channels:
+      alerts: "#data-alerts"
+      reports: "#data-reports"
+  
+  email:
+    enabled: true
+    recipients:
+      - "data-team@company.com"
+

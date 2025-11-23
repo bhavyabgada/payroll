@@ -1,0 +1,50 @@
+# Dockerfile for Airflow
+# Payroll Analytics Platform
+
+FROM apache/airflow:2.7.3-python3.10
+
+USER root
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+USER airflow
+
+# Copy requirements
+COPY requirements.txt /opt/airflow/requirements.txt
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r /opt/airflow/requirements.txt
+
+# Install our published modules
+RUN pip install --no-cache-dir \
+    synthetic-payroll-lab==0.1.0 \
+    scd2-bq-engine==0.1.0 \
+    dataform-warehouse-blueprints==0.1.0 \
+    bq-finops-cli==0.1.0
+
+# Copy DAGs
+COPY airflow/dags /opt/airflow/dags
+
+# Copy scripts
+COPY scripts /opt/airflow/scripts
+
+# Copy Great Expectations configuration
+COPY great_expectations /opt/airflow/great_expectations
+
+# Set environment variables
+ENV AIRFLOW__CORE__LOAD_EXAMPLES=False
+ENV AIRFLOW__CORE__DAGS_FOLDER=/opt/airflow/dags
+ENV AIRFLOW__CORE__EXECUTOR=LocalExecutor
+ENV AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+
+# Expose Airflow webserver port
+EXPOSE 8080
+
+# Initialize database and start services
+CMD ["bash", "-c", "airflow db init && airflow webserver & airflow scheduler"]
+

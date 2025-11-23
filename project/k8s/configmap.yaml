@@ -1,0 +1,33 @@
+# ConfigMap for application configuration
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payroll-config
+  namespace: payroll-analytics
+data:
+  # GCP Configuration
+  GCP_PROJECT_ID: "payroll-analytics-prod"
+  GCP_REGION: "us-central1"
+  
+  # BigQuery Datasets
+  BQ_RAW_DATASET: "payroll_raw"
+  BQ_STAGING_DATASET: "payroll_staging"
+  BQ_WAREHOUSE_DATASET: "payroll_warehouse"
+  BQ_MARTS_DATASET: "payroll_marts"
+  BQ_ASSERTIONS_DATASET: "payroll_assertions"
+  
+  # GCS Buckets
+  GCS_LANDING_BUCKET: "payroll-landing-prod"
+  GCS_ARCHIVE_BUCKET: "payroll-archive-prod"
+  GCS_TEMP_BUCKET: "payroll-temp-prod"
+  
+  # Airflow Configuration
+  AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+  AIRFLOW__CORE__DAGS_FOLDER: "/opt/airflow/dags"
+  AIRFLOW__CORE__EXECUTOR: "KubernetesExecutor"
+  
+  # Application Settings
+  ENVIRONMENT: "production"
+  LOG_LEVEL: "INFO"
+

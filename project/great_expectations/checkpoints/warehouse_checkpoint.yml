@@ -1,0 +1,44 @@
+# Checkpoint for Warehouse Layer Validation
+# Runs after warehouse tables are loaded
+
+name: warehouse_checkpoint
+config_version: 1.0
+
+class_name: Checkpoint
+
+validations:
+  - batch_request:
+      datasource_name: payroll_bigquery
+      data_connector_name: warehouse_connector
+      data_asset_name: fact_payroll_run
+    expectation_suite_name: fact_payroll_run_suite
+    action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreValidationResultAction
+      - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction
+      - name: send_slack_notification_on_validation_result
+        action:
+          class_name: SlackNotificationAction
+          slack_webhook: ${SLACK_WEBHOOK_URL}
+          notify_on: failure
+
+action_list:
+  - name: store_validation_result
+    action:
+      class_name: StoreValidationResultAction
+  - name: store_evaluation_params
+    action:
+      class_name: StoreEvaluationParametersAction
+  - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+
+runtime_configuration:
+  result_format:
+    result_format: COMPLETE
+    include_unexpected_rows: true
+    partial_unexpected_count: 20
+

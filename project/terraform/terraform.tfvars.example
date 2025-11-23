@@ -1,0 +1,25 @@
+# Terraform Variables - Example
+# Copy this file to terraform.tfvars and update with your values
+
+project_id  = "payroll-analytics-dev"
+region      = "us-central1"
+location    = "US"
+environment = "dev"
+
+# Optionally override dataset configurations
+# bigquery_datasets = {
+#   raw = {
+#     description                 = "Custom description"
+#     default_table_expiration_ms = null
+#     delete_contents_on_destroy  = true
+#   }
+# }
+
+# Optionally override bucket configurations
+# gcs_buckets = {
+#   landing = {
+#     storage_class = "STANDARD"
+#     lifecycle_age = 30
+#   }
+# }
+

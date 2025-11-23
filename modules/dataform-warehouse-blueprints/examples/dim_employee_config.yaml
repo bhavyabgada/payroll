@@ -1,0 +1,34 @@
+table_name: dim_employee
+layer: warehouse
+table_type: dimension
+source_table: ${ref('stg_employees')}
+columns:
+  - employee_id
+  - first_name
+  - last_name
+  - email
+  - phone
+  - hire_date
+  - termination_date
+  - job_id
+  - department
+  - status
+  - updated_at
+partition_by: updated_at
+cluster_by:
+  - employee_id
+primary_keys:
+  - employee_id
+description: Employee dimension table (SCD Type 1)
+tags:
+  - dimension
+  - hr
+  - employee
+incremental: true
+dataset_id: warehouse
+dependencies:
+  - stg_employees
+assertions:
+  - description: Employee ID must be unique
+  - description: Email must be valid format
+

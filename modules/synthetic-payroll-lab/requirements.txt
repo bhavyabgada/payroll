@@ -1,0 +1,7 @@
+faker>=20.0.0
+mimesis>=11.0.0
+pandas>=2.0.0
+pydantic>=2.0.0
+pyyaml>=6.0
+click>=8.0.0
+

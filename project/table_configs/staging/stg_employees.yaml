@@ -1,0 +1,31 @@
+table_name: stg_employees
+layer: staging
+table_type: source
+source_table: ${ref('raw_employees')}
+columns:
+  - employee_id
+  - first_name
+  - last_name
+  - email
+  - phone
+  - hire_date
+  - termination_date
+  - job_id
+  - department
+  - status
+  - created_at
+  - updated_at
+partition_by: updated_at
+cluster_by:
+  - employee_id
+  - department
+description: "Staging table for employees - cleaned and standardized"
+tags:
+  - staging
+  - hr
+  - employees
+incremental: true
+dataset_id: payroll_staging
+dependencies:
+  - raw_employees
+

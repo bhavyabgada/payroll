@@ -1,0 +1,31 @@
+table_name: mart_payroll_summary_by_dept
+layer: marts
+table_type: aggregate
+source_table: ${ref('fact_payroll_run')}
+columns:
+  - pay_period
+  - department
+  - SUM(gross_pay) as total_gross_pay
+  - SUM(net_pay) as total_net_pay
+  - SUM(tax_withheld) as total_tax
+  - AVG(gross_pay) as avg_gross_pay
+  - COUNT(DISTINCT employee_id) as employee_count
+  - SUM(hours_worked) as total_hours
+partition_by: pay_period
+cluster_by:
+  - department
+primary_keys:
+  - pay_period
+  - department
+description: Payroll summary by department and pay period
+tags:
+  - mart
+  - payroll
+  - summary
+  - reporting
+incremental: false
+dataset_id: marts
+dependencies:
+  - fact_payroll_run
+  - dim_employee
+

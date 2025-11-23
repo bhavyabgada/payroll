@@ -1,0 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# Great Expectations
+great_expectations/uncommitted/
+great_expectations/.ge_store_backend_id
+
+# Airflow
+airflow/logs/
+airflow/*.pid
+airflow/*.cfg
+airflow/airflow.db
+
+# Terraform
+*.tfstate
+*.tfstate.backup
+.terraform/
+*.tfvars
+
+# Data files (don't commit actual data)
+*.csv
+*.parquet
+*.json.gz
+
+# Reports
+reports/*.json
+reports/*.html
+
+# Temporary
+*.tmp
+temp/
+tmp/
+

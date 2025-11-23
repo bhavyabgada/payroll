@@ -1,0 +1,68 @@
+# CronJob for FinOps Monitoring
+# Runs weekly cost analysis
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: finops-monitoring
+  namespace: payroll-analytics
+spec:
+  # Run every Monday at 8 AM
+  schedule: "0 8 * * 1"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: finops-monitor
+            image: gcr.io/payroll-analytics-prod/utils:latest
+            imagePullPolicy: Always
+            envFrom:
+            - configMapRef:
+                name: payroll-config
+            env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /var/secrets/google/service-account-key.json
+            volumeMounts:
+            - name: gcp-credentials
+              mountPath: /var/secrets/google
+              readOnly: true
+            - name: reports
+              mountPath: /app/reports
+            command:
+            - python
+            - /app/scripts/finops_monitoring.py
+            - --project-id
+            - "payroll-analytics-prod"
+            - --days
+            - "7"
+            resources:
+              requests:
+                memory: "512Mi"
+                cpu: "250m"
+              limits:
+                memory: "1Gi"
+                cpu: "500m"
+          volumes:
+          - name: gcp-credentials
+            secret:
+              secretName: gcp-credentials
+          - name: reports
+            persistentVolumeClaim:
+              claimName: reports-pvc
+
+---
+# PersistentVolumeClaim for reports
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: reports-pvc
+  namespace: payroll-analytics
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+

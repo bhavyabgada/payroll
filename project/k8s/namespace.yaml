@@ -1,0 +1,11 @@
+# Kubernetes Namespace
+# Isolate payroll resources
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: payroll-analytics
+  labels:
+    name: payroll-analytics
+    environment: production
+

@@ -1,0 +1,43 @@
+# Dataform Workflow Settings
+# Controls how Dataform compiles and runs the project
+
+defaultProject: payroll-analytics-dev
+defaultDataset: payroll_warehouse
+defaultLocation: US
+
+# Compilation settings
+compilation:
+  assertionSchema: payroll_assertions
+  defaultDatabase: payroll_raw
+
+# Scheduling (for Dataform Cloud / Airflow)
+schedule:
+  cron: "0 2 * * *"  # Daily at 2 AM UTC
+  timeZone: "America/New_York"
+
+# Variables
+vars:
+  environment: dev
+  raw_dataset: payroll_raw
+  staging_dataset: payroll_staging
+  warehouse_dataset: payroll_warehouse
+  marts_dataset: payroll_marts
+  incremental_date: "${INCREMENTAL_DATE}"
+
+# Environments
+environments:
+  dev:
+    defaultProject: payroll-analytics-dev
+    vars:
+      environment: dev
+  
+  staging:
+    defaultProject: payroll-analytics-staging
+    vars:
+      environment: staging
+  
+  prod:
+    defaultProject: payroll-analytics-prod
+    vars:
+      environment: prod
+

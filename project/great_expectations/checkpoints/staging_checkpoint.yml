@@ -1,0 +1,46 @@
+# Checkpoint for Staging Layer Validation
+# Runs after staging tables are loaded
+
+name: staging_checkpoint
+config_version: 1.0
+
+class_name: Checkpoint
+
+validations:
+  - batch_request:
+      datasource_name: payroll_bigquery
+      data_connector_name: staging_connector
+      data_asset_name: stg_employees
+    expectation_suite_name: stg_employees_suite
+    action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreValidationResultAction
+      - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction
+      - name: send_slack_notification_on_validation_result
+        action:
+          class_name: SlackNotificationAction
+          slack_webhook: ${SLACK_WEBHOOK_URL}
+          notify_on: failure
+          renderer:
+            module_name: great_expectations.render.renderer.slack_renderer
+            class_name: SlackRenderer
+
+action_list:
+  - name: store_validation_result
+    action:
+      class_name: StoreValidationResultAction
+  - name: store_evaluation_params
+    action:
+      class_name: StoreEvaluationParametersAction
+  - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+
+runtime_configuration:
+  result_format:
+    result_format: COMPLETE
+    include_unexpected_rows: true
+

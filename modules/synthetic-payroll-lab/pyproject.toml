@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "synthetic-payroll-lab"
+version = "0.1.0"
+description = "Generate realistic enterprise payroll test data with chaos patterns"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Data Engineering Team", email = "dataeng@company.com"}
+]
+keywords = ["payroll", "synthetic-data", "testing", "data-engineering"]
+
+[tool.black]
+line-length = 100
+target-version = ['py39', 'py310', 'py311']
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+

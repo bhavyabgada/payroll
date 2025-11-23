@@ -1,0 +1,40 @@
+# Dockerfile for Utility Scripts
+# Data quality checks, FinOps monitoring, etc.
+
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install our published modules
+RUN pip install --no-cache-dir \
+    synthetic-payroll-lab==0.1.0 \
+    scd2-bq-engine==0.1.0 \
+    dataform-warehouse-blueprints==0.1.0 \
+    bq-finops-cli==0.1.0
+
+# Copy scripts
+COPY scripts /app/scripts
+
+# Copy Great Expectations configuration
+COPY great_expectations /app/great_expectations
+
+# Set working directory
+WORKDIR /app
+
+# Default command
+CMD ["python", "-m", "pytest", "tests/", "-v"]
+

@@ -1,0 +1,22 @@
+table_name: stg_jobs
+layer: staging
+table_type: source
+source_table: ${ref('raw_jobs')}
+columns:
+  - job_id
+  - title
+  - department
+  - pay_type
+  - pay_rate
+  - created_at
+  - updated_at
+partition_by: updated_at
+cluster_by:
+  - job_id
+description: "Staging table for jobs"
+tags:
+  - staging
+  - hr
+incremental: true
+dataset_id: payroll_staging
+

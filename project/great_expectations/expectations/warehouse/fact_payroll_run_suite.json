@@ -1,0 +1,104 @@
+{
+  "expectation_suite_name": "fact_payroll_run_suite",
+  "data_asset_type": "Dataset",
+  "expectations": [
+    {
+      "expectation_type": "expect_table_row_count_to_be_between",
+      "kwargs": {
+        "min_value": 1
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "payroll_id"
+      },
+      "meta": {
+        "notes": "Primary key must not be null"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_unique",
+      "kwargs": {
+        "column": "payroll_id"
+      },
+      "meta": {
+        "notes": "Primary key must be unique"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "employee_id"
+      },
+      "meta": {
+        "notes": "Foreign key must not be null"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "pay_date"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "gross_pay",
+        "min_value": 0,
+        "max_value": 1000000
+      },
+      "meta": {
+        "notes": "Gross pay should be non-negative and reasonable"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "net_pay",
+        "min_value": 0,
+        "max_value": 1000000
+      },
+      "meta": {
+        "notes": "Net pay should be non-negative and reasonable"
+      }
+    },
+    {
+      "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+      "kwargs": {
+        "column_A": "gross_pay",
+        "column_B": "net_pay",
+        "or_equal": true
+      },
+      "meta": {
+        "notes": "Gross pay should be >= net pay"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "hours_worked",
+        "min_value": 0,
+        "max_value": 744
+      },
+      "meta": {
+        "notes": "Hours worked should be reasonable (max 744 = 31 days * 24 hours)"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "status",
+        "value_set": ["pending", "processed", "paid", "cancelled"]
+      },
+      "meta": {
+        "notes": "Status must be valid value"
+      }
+    }
+  ],
+  "meta": {
+    "great_expectations_version": "0.18.0",
+    "notes": "Data quality expectations for fact_payroll_run table"
+  }
+}
+
